@@ -7,8 +7,8 @@ QEMU=/usr/bin/qemu-system-arm
 TOOLCHAIN=/opt/gcc-arm-none-eabi-4_8-2014q3/bin
 
 # Choose your emulated board
-BOARD_VERSATILEPB=y
-BOARD_VEXPRESS=n
+BOARD_VERSATILEPB=n
+BOARD_VEXPRESS=y
 
 # Say yes ('y') at first, using the linux terminal as a serial line.
 # Then say no ('n') to discover the use of telnet connections as serial lines. 

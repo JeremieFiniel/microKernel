@@ -1,4 +1,4 @@
-PREFIX ?= /homex/opt/gcc-arm-none-eabi-4_8-2014q3
+PREFIX ?= /opt/gcc-arm-none-eabi-4_8-2014q3
 ARMGNU ?= $(PREFIX)/bin/arm-none-eabi
 
 AS=$(ARMGNU)-as -mthumb -k -mfloat-abi=soft
