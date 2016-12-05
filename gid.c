@@ -23,7 +23,7 @@
 #include "gic.h"
 #include "gid.h"
 
-#undef VERBOSE
+#define VERBOSE
 
 static uint32_t periph_base = 0x00;
 
