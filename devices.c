@@ -31,6 +31,8 @@ void top_uart()
 		uartBuffer.buffer[uartBuffer.end] = c;
 		uartBuffer.end = (uartBuffer.end + 1) % UART_BUFFER_SIZE;
 	}
+
+	//acknowledge the irq;
 	uart_ack_irqs(stdin);
 }
 
