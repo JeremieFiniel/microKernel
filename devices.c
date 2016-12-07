@@ -31,10 +31,6 @@ void top_uart()
 {
 	char c;
 	uart_receive(stdin, &c);
-	if (bottom_event_empty == NULL)
-	{
-		kprintf("Event list full :)\n");
-	}
 	if ((uartBuffer.end + 1) % UART_BUFFER_SIZE != uartBuffer.start && bottom_event_empty != NULL) 
 	{
 		uartBuffer.buffer[uartBuffer.end] = c;
@@ -46,7 +42,9 @@ void top_uart()
 		struct Bottom_event* event;
 		event = bottom_event_empty->next;
 		bottom_event_empty->next = bottom_event_to_handle;
+		bottom_event_to_handle = bottom_event_empty;
 		bottom_event_empty = event;
+
 	}
 
 	//acknowledge the irq;

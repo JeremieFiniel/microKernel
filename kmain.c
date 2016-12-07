@@ -275,7 +275,10 @@ void init_top_bottom()
 	bottom_event_empty = kmalloc(sizeof(struct Bottom_event));
 	event = bottom_event_empty;
 	for (int i = 0; i < EVENT_LIST_SIZE - 1; i ++)
+	{
 		event->next = kmalloc(sizeof(struct Bottom_event));
+		event = event->next;
+	}
 	event->next = NULL;
 	bottom_event_to_handle = NULL;
 }
@@ -318,7 +321,27 @@ void kmain() {
 	arm_enable_interrupts();
 	uart_send_string(stdout, "IRQs enabled\n\r");
 	for (;;)
-		_arm_sleep();
+	{
+
+		i ++;
+		if (bottom_event_to_handle != NULL)
+		{
+			arm_disable_interrupts();
+			void (*bottom_func)(void) = bottom_event_to_handle->bottom_func;
+
+			struct Bottom_event* event = bottom_event_to_handle;
+			bottom_event_to_handle = event->next;
+			event->next = bottom_event_empty;
+			bottom_event_empty = event;
+
+			arm_enable_interrupts();
+			bottom_func();
+		}
+
+	
+
+		//_arm_sleep();
+	}
 #endif
 }
 
