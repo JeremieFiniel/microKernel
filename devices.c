@@ -15,7 +15,7 @@ volatile struct UartBuffer uartBuffer;
 extern struct Bottom_event* bottom_event_empty;
 extern struct Bottom_event* bottom_event_to_handle;
 
-void init_uart_device()
+void init_uart_device_driver()
 {
 	uartBuffer.buffer = kmalloc(UART_BUFFER_SIZE);
 	uartBuffer.start = 0;

@@ -308,6 +308,7 @@ void kmain() {
 	poll();
 #else
 	init_top_bottom();
+	init_uart_device_driver();
 	irq_init();
 #ifdef vexpress_a9
 	umain(32);

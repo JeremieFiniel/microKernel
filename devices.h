@@ -1,7 +1,7 @@
 #ifndef DEVICES_H_
 #define DEVICES_H_
 
-void init_uart_device();
+void init_uart_device_driver();
 void top_uart();
 void bottom_uart();
 
