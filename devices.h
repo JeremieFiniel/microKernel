@@ -2,7 +2,6 @@
 #define DEVICES_H_
 
 #include "board.h"
-#include "pl011.h"
 #ifdef vexpress_a9
 #include "gic.h"
 #else
