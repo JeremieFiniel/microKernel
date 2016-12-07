@@ -64,19 +64,19 @@ struct pl011_uart* stdout;
  *    - Enable interrupts at the Cortex-A9 level
  */
 void irq_init() {
-  cortex_a9_gid_init();
-  // cortex_a9_gid_dump_state();
-  uart_send_string(stdout, "GID initialized.\n\r");
-  cortex_a9_gic_init();
-  // cortex_a9_gic_dump_state();
-  uart_send_string(stdout, "GIC initialized.\n\r");
+	cortex_a9_gid_init();
+	// cortex_a9_gid_dump_state();
+	uart_send_string(stdout, "GID initialized.\n\r");
+	cortex_a9_gic_init();
+	// cortex_a9_gic_dump_state();
+	uart_send_string(stdout, "GIC initialized.\n\r");
 
-  /*
-   * Enable the RX interrupt on the UART0, our standard input (stdin).
-   * We do not need to enable any other interrupts, but many others exist.
-   */
-  uart_enable_irqs(stdin,UART_IMSC_RXIM);
-  cortex_a9_gid_enable_irq(UART0_IRQ);
+	/*
+	 * Enable the RX interrupt on the UART0, our standard input (stdin).
+	 * We do not need to enable any other interrupts, but many others exist.
+	 */
+	uart_enable_irqs(stdin,UART_IMSC_RXIM);
+	cortex_a9_gid_enable_irq(UART0_IRQ);
 }
 
 /**
@@ -85,54 +85,54 @@ void irq_init() {
  * handled by a different handler. See assembly setup in gic.s.
  */
 void irq_handler(void) {
-  irq_id_t irq = 0;
-  cpu_id_t cpu = 0;
-  char c = '.';
+	irq_id_t irq = 0;
+	cpu_id_t cpu = 0;
+	char c = '.';
 
-  /*
-   * One generic handler means that the first step is asking the GIC
-   * which interrupt is active, that is, which is the current interrupt
-   * we are handling here.
-   */
-  cortex_a9_gic_get_current_irq(&irq, &cpu);
-  /*
-   * The current interrupt can be a spurious interrupt. One of the cause
-   * of spurious interrupts is a device clearing the interrupt in between
-   * the time the GIC notified the processor about the interrupt and the
-   * time the handler actually gets called. By the time the handler enquires
-   * about the current interrupt, there is none to report, so the GIC reports
-   * a spurious interrupt.
-   */
-  if (ARM_GIC_IAR_SPURIOUS(irq))
-    return;
+	/*
+	 * One generic handler means that the first step is asking the GIC
+	 * which interrupt is active, that is, which is the current interrupt
+	 * we are handling here.
+	 */
+	cortex_a9_gic_get_current_irq(&irq, &cpu);
+	/*
+	 * The current interrupt can be a spurious interrupt. One of the cause
+	 * of spurious interrupts is a device clearing the interrupt in between
+	 * the time the GIC notified the processor about the interrupt and the
+	 * time the handler actually gets called. By the time the handler enquires
+	 * about the current interrupt, there is none to report, so the GIC reports
+	 * a spurious interrupt.
+	 */
+	if (ARM_GIC_IAR_SPURIOUS(irq))
+		return;
 
-  if (irq == UART0_IRQ) {
-    /*
-     * You must do the read here first, from the UART0, before doing any print
-     * on the same serial line... Normally, this should not be necessary!
-     * The reason is obscure, it is because of an unexplained GCC behavior.
-     * For some unknown reason, GCC generates reads of the UART.DR register when writing to it...
-     * which therefore reads the pending character out of the FIFO and looses it.
-     * Also, the read may lower the IRQ line, if the read drops the number of pending
-     * characters in the receive FIFO below the RX interrupt threshold.
-     */
-    uart_receive(stdin, &c);
-  }
+	if (irq == UART0_IRQ) {
+		/*
+		 * You must do the read here first, from the UART0, before doing any print
+		 * on the same serial line... Normally, this should not be necessary!
+		 * The reason is obscure, it is because of an unexplained GCC behavior.
+		 * For some unknown reason, GCC generates reads of the UART.DR register when writing to it...
+		 * which therefore reads the pending character out of the FIFO and looses it.
+		 * Also, the read may lower the IRQ line, if the read drops the number of pending
+		 * characters in the receive FIFO below the RX interrupt threshold.
+		 */
+		uart_receive(stdin, &c);
+	}
 #ifdef ECHO_IRQ
-  kprintf("\n\r------------------------------\n\r");
-  kprintf("  irq=%d cpu=%d \n\r", irq, cpu);
-  kprintf("------------------------------\n\r");
+	kprintf("\n\r------------------------------\n\r");
+	kprintf("  irq=%d cpu=%d \n\r", irq, cpu);
+	kprintf("------------------------------\n\r");
 #endif
-  if (irq == UART0_IRQ) {
-    if (c == 13) {
-      uart_send(stdout, '\r');
-      uart_send(stdout, '\n');
-    } else {
-      uart_send(stdout, c);
-    }
-    uart_ack_irqs(stdin);
-  }
-  cortex_a9_gic_acknowledge_irq(irq, cpu);
+	if (irq == UART0_IRQ) {
+		if (c == 13) {
+			uart_send(stdout, '\r');
+			uart_send(stdout, '\n');
+		} else {
+			uart_send(stdout, c);
+		}
+		uart_ack_irqs(stdin);
+	}
+	cortex_a9_gic_acknowledge_irq(irq, cpu);
 }
 #endif
 
@@ -161,9 +161,9 @@ void irq_handler(void) {
  *    - Enable interrupts at the ARM CPU interface level
  */
 void irq_init() {
-  vic_init();
-  vic_enable_irq(PL190_UART0_INTR,0x0000BABE);
-  uart_enable_irqs(stdin,UART_IMSC_RXIM);
+	vic_init();
+	vic_enable_irq(PL190_UART0_INTR,0x0000BABE);
+	uart_enable_irqs(stdin,UART_IMSC_RXIM);
 }
 
 /**
@@ -173,19 +173,19 @@ void irq_init() {
  * See assembly setup in PL190.s.
  */
 void irq_handler() {
-  uint32_t isr = vic_isr();
-  if (isr==(uint32_t)0x0000BABE) {
-    char c = '.';
-    uart_receive(stdin, &c);
-    if (c == 13) {
-      uart_send(stdout, '\r');
-      uart_send(stdout, '\n');
-    } else {
-      uart_send(stdout, c);
-    }
-    uart_ack_irqs(stdin);
-  }
-  vic_ack();
+	uint32_t isr = vic_isr();
+	if (isr==(uint32_t)0x0000BABE) {
+		char c = '.';
+		uart_receive(stdin, &c);
+		if (c == 13) {
+			uart_send(stdout, '\r');
+			uart_send(stdout, '\n');
+		} else {
+			uart_send(stdout, c);
+		}
+		uart_ack_irqs(stdin);
+	}
+	vic_ack();
 }
 
 #endif
@@ -195,7 +195,7 @@ void irq_handler() {
  * As you can see, we currently print out on the UART0.
  */
 void kputchar(int c, void *arg) {
-  uart_send(UART0, c);
+	uart_send(UART0, c);
 }
 
 /**
@@ -205,12 +205,12 @@ void kputchar(int c, void *arg) {
  */
 #ifdef ECHO_ZZZ
 void zzz(void) {
-  static uint32_t count = 0;
-  count++;
-  if (count > 60000000) {
-    kprintf("Zzzz...\n\r");
-    count = 0;
-  }
+	static uint32_t count = 0;
+	count++;
+	if (count > 60000000) {
+		kprintf("Zzzz...\n\r");
+		count = 0;
+	}
 }
 #else
 #define zzz() 
@@ -218,58 +218,58 @@ void zzz(void) {
 
 #ifdef CONFIG_TEST_MALLOC
 #define NCHUNKS 124
-  void* chunks[NCHUNKS];
-  size_t sizes[NCHUNKS];
-  size_t nchunks=0;
+void* chunks[NCHUNKS];
+size_t sizes[NCHUNKS];
+size_t nchunks=0;
 #endif
 
 /**
  * Polling approach to listen on "stdin" and echo on "stdout"
  */
 void poll() {
-  for (;;) {
-    unsigned char c;
-    zzz();
-    if (0 == uart_receive(stdin, &c))
-      continue;
-    if (c == 13) {
-      uart_send(stdout, '\r');
-      uart_send(stdout, '\n');
-    } else {
-      uart_send(stdout, c);
-    }
+	for (;;) {
+		unsigned char c;
+		zzz();
+		if (0 == uart_receive(stdin, &c))
+			continue;
+		if (c == 13) {
+			uart_send(stdout, '\r');
+			uart_send(stdout, '\n');
+		} else {
+			uart_send(stdout, c);
+		}
 #ifdef CONFIG_TEST_MALLOC
-    if (nchunks>=NCHUNKS || c==13) {
-      size_t nfreed = 0;
-      kprintf("Free %d chunks: \n\r",nchunks);
-      for (int i=0;i<nchunks;i+=2) {
-        kprintf("  chunks[%d]: %d bytes @ 0x%x \n\r",i,sizes[i],chunks[i]);
-        free(chunks[i]);
-        nfreed++;
-      }
-      for (int i=1;i<nchunks;i+=2) {
-        kprintf("  chunks[%d]: %d bytes @ 0x%x \n\r",i,sizes[i],chunks[i]);
-        free(chunks[i]);
-        nfreed++;
-      }
-      assert(nfreed==nchunks," FIXME ");
-      space_valloc_cleanup();
-      nchunks = 0;
-    }
-    size_t size = c;
-    if (size>= MAX_HOLE_SIZE)
-      size = MAX_HOLE_SIZE;
-    sizes[nchunks] = size;
-    chunks[nchunks++]= malloc(size);
+		if (nchunks>=NCHUNKS || c==13) {
+			size_t nfreed = 0;
+			kprintf("Free %d chunks: \n\r",nchunks);
+			for (int i=0;i<nchunks;i+=2) {
+				kprintf("  chunks[%d]: %d bytes @ 0x%x \n\r",i,sizes[i],chunks[i]);
+				free(chunks[i]);
+				nfreed++;
+			}
+			for (int i=1;i<nchunks;i+=2) {
+				kprintf("  chunks[%d]: %d bytes @ 0x%x \n\r",i,sizes[i],chunks[i]);
+				free(chunks[i]);
+				nfreed++;
+			}
+			assert(nfreed==nchunks," FIXME ");
+			space_valloc_cleanup();
+			nchunks = 0;
+		}
+		size_t size = c;
+		if (size>= MAX_HOLE_SIZE)
+			size = MAX_HOLE_SIZE;
+		sizes[nchunks] = size;
+		chunks[nchunks++]= malloc(size);
 #endif
-  }
+	}
 }
 
 
 extern void umain(uint32_t userno);
 
 void /* __attribute__ ((interrupt ("SWI"))) */ swi_handler (uint32_t r0, uint32_t r1, uint32_t r2, uint32_t no) {
-  kprintf("SWI no=%d, r0=0x%x r1=0x%x r2=0x%x  \n",no,r0,r1,r2);
+	kprintf("SWI no=%d, r0=0x%x r1=0x%x r2=0x%x  \n",no,r0,r1,r2);
 }
 
 /**
@@ -277,38 +277,38 @@ void /* __attribute__ ((interrupt ("SWI"))) */ swi_handler (uint32_t r0, uint32_
  * See startup.s
  */
 void kmain() {
-  int i = 0;
+	int i = 0;
 
-  stdin = UART0;
-  uart_init(stdin);
+	stdin = UART0;
+	uart_init(stdin);
 #ifdef LOCAL_ECHO
-  stdout = UART0;
+	stdout = UART0;
 #else
-  stdout = UART1;
-  uart_init(stdout);
+	stdout = UART1;
+	uart_init(stdout);
 #endif
 
-  space_valloc_init();
+	space_valloc_init();
 
-  uart_send_string(stdout, "\n\nHello world!\n\r");
-  uart_send_string(stdin,"Please type here...\n\r");
+	uart_send_string(stdout, "\n\nHello world!\n\r");
+	uart_send_string(stdin,"Please type here...\n\r");
 #ifndef LOCAL_ECHO
-  uart_send_string(stdout,"\n\nCharacters will appear here...\n\r");
+	uart_send_string(stdout,"\n\nCharacters will appear here...\n\r");
 #endif
 
 #ifdef CONFIG_POLLING
-  poll();
+	poll();
 #else
-  irq_init();
+	irq_init();
 #ifdef vexpress_a9
-  umain(32);
-  umain(16);
+	umain(32);
+	umain(16);
 
 #endif
-  arm_enable_interrupts();
-  uart_send_string(stdout, "IRQs enabled\n\r");
-  for (;;)
-    _arm_sleep();
+	arm_enable_interrupts();
+	uart_send_string(stdout, "IRQs enabled\n\r");
+	for (;;)
+		_arm_sleep();
 #endif
 }
 
