@@ -40,6 +40,10 @@ extern void _arm_sleep(void);
 struct pl011_uart* stdin;
 struct pl011_uart* stdout;
 
+#define EVENT_LIST_SIZE 8
+struct Bottom_event* bottom_event_empty;
+struct Bottom_event* bottom_event_to_handle;
+
 /**
  * We do support two boards, the VExpress-A9 board and the VersatilePB board.
  * They have two different interrupt controllers, so this impacts the interrupt
@@ -265,6 +269,17 @@ void /* __attribute__ ((interrupt ("SWI"))) */ swi_handler (uint32_t r0, uint32_
 	kprintf("SWI no=%d, r0=0x%x r1=0x%x r2=0x%x  \n",no,r0,r1,r2);
 }
 
+void init_top_bottom()
+{
+	struct Bottom_event* event;
+	bottom_event_empty = kmalloc(sizeof(struct Bottom_event));
+	event = bottom_event_empty;
+	for (int i = 0; i < EVENT_LIST_SIZE - 1; i ++)
+		event->next = kmalloc(sizeof(struct Bottom_event));
+	event->next = NULL;
+	bottom_event_to_handle = NULL;
+}
+
 /**
  * This is the C entry point, upcalled from assembly.
  * See startup.s
@@ -292,6 +307,7 @@ void kmain() {
 #ifdef CONFIG_POLLING
 	poll();
 #else
+	init_top_bottom();
 	irq_init();
 #ifdef vexpress_a9
 	umain(32);

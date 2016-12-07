@@ -12,6 +12,9 @@ struct UartBuffer{
 
 volatile struct UartBuffer uartBuffer;
 
+extern struct Bottom_event* bottom_event_empty;
+extern struct Bottom_event* bottom_event_to_handle;
+
 void init_uart_device()
 {
 	uartBuffer.buffer = kmalloc(UART_BUFFER_SIZE);
@@ -24,10 +27,18 @@ void top_uart()
 {
 	char c;
 	uart_receive(stdin, &c);
-	if ((uartBuffer.end + 1) % UART_BUFFER_SIZE != uartBuffer.start)
+	if ((uartBuffer.end + 1) % UART_BUFFER_SIZE != uartBuffer.start && bottom_event_empty != NULL) 
 	{
 		uartBuffer.buffer[uartBuffer.end] = c;
 		uartBuffer.end = (uartBuffer.end + 1) % UART_BUFFER_SIZE;
+
+		bottom_event_empty->irq = UART0_IRQ;
+		bottom_event_empty->bottom_func = &bottom_uart;
+
+		struct Bottom_event* event;
+		event = bottom_event_empty->next;
+		bottom_event_empty->next = bottom_event_to_handle;
+		bottom_event_empty = event;
 	}
 
 	//acknowledge the irq;

@@ -7,7 +7,7 @@ void bottom_uart();
 
 struct Bottom_event{
 	irq_id_t irq;
-	void (*bottom_func)(void *);
+	void (*bottom_func)(void);
 	struct Bottom_event *next;
 };
 
