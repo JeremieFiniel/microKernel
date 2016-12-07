@@ -1,10 +1,8 @@
-struct bottom_event{
-	irq_id_t irq;
-	void (*bottom_func)(void *);
-};
+#include "devices.h"
+#include "pl011.h"
+
 
 #define UART_BUFFER_SIZE 16
-
 
 struct UartBuffer{
 	static char *buffer;

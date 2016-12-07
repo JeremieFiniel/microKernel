@@ -29,6 +29,8 @@
 #endif
 #include "kmem.h"
 
+#include "devices.h"
+
 #define ECHO
 #define ECHO_ZZZ
 #undef ECHO_IRQ
