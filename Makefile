@@ -171,6 +171,9 @@ build/kmem.o: kmem.c Makefile
 build/kmain.o: kmain.c Makefile
 	$(GCC) $(CFLAGS) kmain.c -o build/kmain.o
 
+build/devices.o: devices.c devices.h Makefile
+	$(GCC) $(CFLAGS) devices.c -o build/devices.o
+
 #
 # User code
 #
