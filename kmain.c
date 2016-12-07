@@ -116,22 +116,13 @@ void irq_handler(void) {
 		 * Also, the read may lower the IRQ line, if the read drops the number of pending
 		 * characters in the receive FIFO below the RX interrupt threshold.
 		 */
-		uart_receive(stdin, &c);
+		top_uart();
 	}
 #ifdef ECHO_IRQ
 	kprintf("\n\r------------------------------\n\r");
 	kprintf("  irq=%d cpu=%d \n\r", irq, cpu);
 	kprintf("------------------------------\n\r");
 #endif
-	if (irq == UART0_IRQ) {
-		if (c == 13) {
-			uart_send(stdout, '\r');
-			uart_send(stdout, '\n');
-		} else {
-			uart_send(stdout, c);
-		}
-		uart_ack_irqs(stdin);
-	}
 	cortex_a9_gic_acknowledge_irq(irq, cpu);
 }
 #endif
