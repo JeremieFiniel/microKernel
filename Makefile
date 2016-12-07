@@ -61,7 +61,7 @@ ifeq ($(BOARD_VERSATILEPB),y)
   BOARD=versatilepb
   CPU=arm926ej-s
   QEMU_BOARD=versatileab
-  QEMU_OPTIONS=  -m 64M 
+  QEMU_OPTIONS=  -m 64M -nographic 
   CONFIG_BOARD=$(BOARD)
   LDSCRIPT=ldscript.versatile
   OBJS+= build/pl011.o build/startup.o build/pl190_c.o build/pl190_s.o
@@ -180,8 +180,11 @@ build/user.o: user.c Makefile
 run: all
 	$(QEMU) -M $(QEMU_BOARD) -kernel $(BOARD).bin $(SERIAL_LINES) $(QEMU_OPTIONS) 
 
-gdb: all
+debug: all
 	$(QEMU) -M $(QEMU_BOARD) -kernel $(BOARD).bin $(SERIAL_LINES) $(QEMU_OPTIONS) -s -S
+
+gdb:
+	$(TOOLCHAIN)/arm-none-eabi-gdb $(BOARD).elf
 
 kill:
 	pkill qemu-system-arm
