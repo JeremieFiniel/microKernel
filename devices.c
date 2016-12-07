@@ -1,19 +1,23 @@
 #include "devices.h"
 #include "pl011.h"
+#include "kmem.h"
 
 
 #define UART_BUFFER_SIZE 16
 
 struct UartBuffer{
-	static char *buffer;
-	static int start;
-	static int end;
+	char *buffer;
+	int start;
+	int end;
 };
 
 volatile struct UartBuffer uartBuffer;
 
 extern struct Bottom_event* bottom_event_empty;
 extern struct Bottom_event* bottom_event_to_handle;
+
+extern struct pl011_uart* stdin;
+extern struct pl011_uart* stdout;
 
 void init_uart_device_driver()
 {
@@ -27,6 +31,10 @@ void top_uart()
 {
 	char c;
 	uart_receive(stdin, &c);
+	if (bottom_event_empty == NULL)
+	{
+		kprintf("Event list full :)\n");
+	}
 	if ((uartBuffer.end + 1) % UART_BUFFER_SIZE != uartBuffer.start && bottom_event_empty != NULL) 
 	{
 		uartBuffer.buffer[uartBuffer.end] = c;
