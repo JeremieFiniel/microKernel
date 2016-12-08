@@ -13,9 +13,6 @@ struct UartBuffer{
 
 volatile struct UartBuffer uartBuffer;
 
-extern struct Bottom_event* bottom_event_empty;
-extern struct Bottom_event* bottom_event_to_handle;
-
 extern struct pl011_uart* stdin;
 extern struct pl011_uart* stdout;
 
@@ -31,19 +28,12 @@ void top_uart()
 {
 	char c;
 	uart_receive(stdin, &c);
-	if ((uartBuffer.end + 1) % UART_BUFFER_SIZE != uartBuffer.start && bottom_event_empty != NULL) 
+	if ((uartBuffer.end + 1) % UART_BUFFER_SIZE != uartBuffer.start) 
 	{
 		uartBuffer.buffer[uartBuffer.end] = c;
 		uartBuffer.end = (uartBuffer.end + 1) % UART_BUFFER_SIZE;
 
-		bottom_event_empty->irq = UART0_IRQ;
-		bottom_event_empty->bottom_func = &bottom_uart;
-
-		struct Bottom_event* event;
-		event = bottom_event_empty->next;
-		bottom_event_empty->next = bottom_event_to_handle;
-		bottom_event_to_handle = bottom_event_empty;
-		bottom_event_empty = event;
+		create_bottom_event(&bottom_uart);
 
 	}
 
@@ -73,3 +63,65 @@ void bottom_uart()
 	}
 }
 
+void init_bottom_event_list()
+{
+	struct Bottom_event* event;
+	event = kmalloc(sizeof(struct Bottom_event));
+	bottom_event_list.free_event = event;
+	for (int i = 0; i < EVENT_LIST_SIZE - 1; i ++)
+	{
+		event->next = kmalloc(sizeof(struct Bottom_event));
+		event = event->next;
+	}
+	event->next = NULL;
+	bottom_event_list.head = NULL;
+	bottom_event_list.tail = NULL;
+
+}
+
+void free_bottom_event_list()
+{
+	// TODO
+}
+
+// add a bottom event on the pending list
+void create_bottom_event(void (*func)(void))
+{
+	struct Bottom_event* event;
+	event = bottom_event_list.free_event;
+	if (event != NULL)
+	{
+		event->bottom_func = &bottom_uart; // fill the event
+		bottom_event_list.free_event = event->next; // remove from the free list
+		if (bottom_event_list.head == NULL) // list is empty
+		{
+			bottom_event_list.head = event;
+			bottom_event_list.tail = event;
+		}
+		else //add the event on the tail
+			bottom_event_list.tail->next = event;
+		event->next = NULL;
+	}
+}
+
+// return the first pending bottom event, or null if the list is empty
+void (*pending_bottom_event())(void)
+{
+	struct Bottom_event* event;
+	event = bottom_event_list.head;
+	if (event == NULL) // no pending event
+		return NULL;
+	
+	void (*func)(void) = event->bottom_func;
+	
+	struct Bottom_event* tmpEvent;
+
+	tmpEvent = event->next;
+	event->next = bottom_event_list.free_event;
+	bottom_event_list.free_event = event;
+	bottom_event_list.head = tmpEvent;
+	if (bottom_event_list.head == NULL) // list is empty
+		bottom_event_list.tail = NULL;
+
+	return func;
+}
