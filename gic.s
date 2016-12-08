@@ -147,6 +147,7 @@ _arm_irq_init:
 	 */
 	mrc p15, 0, r1, c1, c0, 0 @ Read Control Register configuration data
 	bic r1, r1, #0x1          @ Disable MMU
+	//orr r1, r1, #0x1          @ Enable MMU
     mcr p15, 0, r1, c1, c0, 0 @ Write Control Register configuration data
 	isb
 
