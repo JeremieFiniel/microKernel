@@ -14,6 +14,8 @@ void init_uart_device_driver();
 void top_uart();
 void bottom_uart();
 
+void top_timer();
+
 /*
  * structure for link of a linked list of bottom event
  */

@@ -109,7 +109,7 @@ typedef uint8_t boolean_t;
 
 #define ARM_GIC_BASE_OFFSET   0x00100  // Generic Interrupt Controller
 #define ARM_GST_BASE_OFFSET   0x00200  // Global System Timer
-#define ARM_PWT_BASE_OFFSET   0x00200  // Private Watchd dogs and Timers
+#define ARM_PWT_BASE_OFFSET   0x00600  // Private Watchd dogs and Timers
 #define ARM_GID_BASE_OFFSET   0x01000  // Generic Interrupt Distributor
 
 #define CORTEX_A9_NIRQS           96
@@ -140,7 +140,6 @@ uintptr_t cortex_a9_peripheral_base() {
 #define UART1_IRQ 13
 #define UART2 ((void*)0x101f3000)
 #define UART2_IRQ 14
-#define TIMER_IRQ 29
 #endif
 
 #ifdef vexpress_a9
@@ -167,6 +166,7 @@ uintptr_t cortex_a9_peripheral_base() {
 #define UART3 ((void*)0x1000c000)
 #define UART3_IRQ (32+8)
 
+#define TIMER_IRQ 29
 #endif
 
 extern void _arm_halt(void);

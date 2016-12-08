@@ -1,6 +1,7 @@
 #include "devices.h"
 #include "pl011.h"
 #include "kmem.h"
+#include "timer.h"
 
 
 #define UART_BUFFER_SIZE 16
@@ -61,6 +62,12 @@ void bottom_uart()
 			uart_send(stdout, c);
 		}
 	}
+}
+
+void top_timer()
+{
+	kprintf("Timer reach 0\n");
+	cortex_a9_timer_clear_irq();
 }
 
 void init_bottom_event_list()
