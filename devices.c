@@ -29,7 +29,7 @@ void top_uart()
 {
 	char c;
 	uart_receive(stdin, &c);
-	if ((uartBuffer.end + 1) % UART_BUFFER_SIZE != uartBuffer.start) 
+	if (((uartBuffer.end + 1) % UART_BUFFER_SIZE) != uartBuffer.start) 
 	{
 		uartBuffer.buffer[uartBuffer.end] = c;
 		uartBuffer.end = (uartBuffer.end + 1) % UART_BUFFER_SIZE;
@@ -54,7 +54,7 @@ void bottom_uart()
 	while (uartBuffer.start != uartBuffer.end)
 	{
 		c = uartBuffer.buffer[uartBuffer.start];
-		uartBuffer.start ++; 
+		uartBuffer.start = (uartBuffer.start+1)%UART_BUFFER_SIZE; 
 		if (c == 13) {
 			uart_send(stdout, '\r');
 			uart_send(stdout, '\n');
@@ -66,8 +66,18 @@ void bottom_uart()
 
 void top_timer()
 {
-	kprintf("Timer reach 0\n");
+	//kprintf("Timer reach 0\n");
 	cortex_a9_timer_clear_irq();
+
+
+	void (*bottom_func)(void) = pending_bottom_event();
+	while (bottom_func != NULL)
+	{
+		arm_enable_interrupts();
+		bottom_func();
+		arm_disable_interrupts();
+		bottom_func = pending_bottom_event();
+	}
 }
 
 void init_bottom_event_list()
@@ -118,9 +128,9 @@ void (*pending_bottom_event())(void)
 	event = bottom_event_list.head;
 	if (event == NULL) // no pending event
 		return NULL;
-	
+
 	void (*func)(void) = event->bottom_func;
-	
+
 	struct Bottom_event* tmpEvent;
 
 	tmpEvent = event->next;
