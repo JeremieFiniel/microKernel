@@ -8,7 +8,6 @@ static uint32_t timer_cr = 0x0;
 void cortex_a9_timer_init()
 {
 	periph_base = cortex_a9_peripheral_base();
-	timer_cr = 0x0;
 }
 
 void cortex_a9_timer_enable()

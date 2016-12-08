@@ -34,8 +34,7 @@
 
 #define ECHO
 #define ECHO_ZZZ
-//#undef ECHO_IRQ
-#define ECHO_IRQ
+#undef ECHO_IRQ
 
 extern void _arm_sleep(void);
 
@@ -86,19 +85,13 @@ void irq_init() {
 	 * Enable timer interrupt on one shot
 	 */
 	cortex_a9_timer_init();
-	cortex_a9_timer_set_auto_load(0);
-	cortex_a9_timer_set_timer(10000);
+	//cortex_a9_timer_set_auto_load(0);
+	cortex_a9_timer_set_auto_load(1);
+	cortex_a9_timer_set_timer(100000000);
 	cortex_a9_timer_enable_irq();
 
 	cortex_a9_gid_enable_irq(TIMER_IRQ);
 	cortex_a9_timer_enable();
-
-	int j = 0;
-	for (int i = 0; i < 10000; i ++)
-	{
-		int time = read_timer_count();
-		j ++;
-	}
 }
 
 /**
