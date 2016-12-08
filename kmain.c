@@ -87,7 +87,7 @@ void irq_init() {
 	cortex_a9_timer_init();
 	//cortex_a9_timer_set_auto_load(0);
 	cortex_a9_timer_set_auto_load(1);
-	cortex_a9_timer_set_timer(100000000);
+	cortex_a9_timer_set_timer(1000000);
 	cortex_a9_timer_enable_irq();
 
 	cortex_a9_gid_enable_irq(TIMER_IRQ);
@@ -320,16 +320,16 @@ void kmain() {
 	for (;;)
 	{
 
+/*
 		i ++;
 		arm_disable_interrupts();
 		void (*bottom_func)(void) = pending_bottom_event();
 		arm_enable_interrupts();
 		if (bottom_func != NULL)
 			bottom_func();
+*/
 
-
-
-		//_arm_sleep();
+		_arm_sleep();
 	}
 #endif
 }
