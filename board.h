@@ -140,6 +140,7 @@ uintptr_t cortex_a9_peripheral_base() {
 #define UART1_IRQ 13
 #define UART2 ((void*)0x101f3000)
 #define UART2_IRQ 14
+#define TIMER_IRQ 29
 #endif
 
 #ifdef vexpress_a9
