@@ -39,7 +39,7 @@ CONFIG_DEBUG=y
 ####################################################################
 
 # Add the platform-independent code, which is your kernel.
-OBJS = build/kmain.o build/kprintf.o build/kmem.o  build/devices.o
+OBJS = build/kmain.o build/kprintf.o build/kmem.o  build/devices.o build/timer.o
 
 # Add the necessary support for arithmetic operations.
 # The function kprintf uses integer division and modulo.
@@ -173,6 +173,9 @@ build/kmain.o: kmain.c Makefile
 
 build/devices.o: devices.c Makefile
 	$(GCC) $(CFLAGS) devices.c -o build/devices.o
+
+build/timer.o: timer.c Makefile
+	$(GCC) $(CFLAGS) timer.c -o build/timer.o
 
 #
 # User code
