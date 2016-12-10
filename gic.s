@@ -493,3 +493,69 @@ _arm_irq_handler:
 	rfeia sp! // rfeia: Return From Exception Increment After
 
 
+	/*
+	 * This function set the ttrb0 to the pointer passing in argument
+	 */
+	.global _arm_ttrb
+	.func _arm_ttrb
+	/* r0 = page table entry 
+	 * r1 = domain PA
+	 */
+_arm_ttrb:
+
+/*
+	MRC p15, 0, r1, c1, c0, 1 								@ Read Auxiliary Control Register.
+	ORR r1, r1, #(0x1 <<2) 								@ Enable D-side prefetch.
+	MCR p15, 0, r1, c1, c0, 1;								@ Write Auxiliary Control Register.
+	DSB
+	ISB
+
+	//ldr r0, =2_00000000000000000000110111100010
+	ldr r0, =0x6742
+
+	LDR r1, =_kpage_low
+	LDR r3, = 4095
+write_pte:
+	ORR r2, r0, r3, LSL #20									@ OR together address & default PTE bits.
+	STR r2, [r1, r3, LSL #2]									@ Write PTE to TTB.
+	SUBS r3, r3, #1									@ Decrement loop counter.
+	BNE write_pte
+
+	BIC r0, r0, #0x14 									@ Clear CB bits.
+	ORR r0, r0, #0x4 									@ inner write-back, write allocate
+	BIC r0, r0, #0x70000
+	ORR r0, r0, #0x50000
+	ORR r0, r0, #0x200000
+	STR r0, [r1]
+
+
+	// set table base control
+	mov r1, #0x0
+	mcr p15, 0, r1, c2, c0, 2
+
+	// set ttrb0
+	mcr p15, 0, r1, c2, c0, 0
+
+
+	LDR r1, =0x55555555
+	mcr p15, 0, r1, c3, c0, 0 @ Read Control Register configuration data
+	*/
+
+	mcr p15, 0, r0, c2, c0, 0
+	mcr p15, 0, r1, c3, c0, 0 
+
+	mov r1, #0x0
+	mcr p15, 0, r1, c2, c0, 2
+
+	// Invalidate entire instruction TLB
+	MCR p15, 0, r1, c8, c5, 0
+	// Invalidate entire data TLB
+	MCR p15, 0, r1, c8, c6, 0
+
+
+	// enable MMU
+	mrc p15, 0, r1, c1, c0, 0 @ Read Control Register configuration data
+	//bic r1, r1, #0x1          @ Disable MMU
+	orr r1, r1, #0x1          @ Enable MMU
+    mcr p15, 0, r1, c1, c0, 0 @ Write Control Register configuration data
+	.endfunc

@@ -101,6 +101,11 @@ SECTIONS
  _kheap_low = .;
  . = . + 1M; /* Heap size for the malloc */
  _kheap_high = .;
+
+ . = ALIGN(0x2000);
+ _kpage_low = .;
+ . = . + 20K;
+ _kpage_high = .;
   _end = .;
- 
+
 }

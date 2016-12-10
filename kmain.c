@@ -24,13 +24,15 @@
 #ifdef vexpress_a9
 #include "gic.h"
 #include "gid.h"
+
+#include "devices.h"
+#include "timer.h"
+#include "mmu.h"
 #else
 #include "pl190.h"
 #endif
 #include "kmem.h"
 
-#include "devices.h"
-#include "timer.h"
 
 #define ECHO
 #define ECHO_ZZZ
@@ -297,6 +299,11 @@ void kmain() {
 #endif
 
 	space_valloc_init();
+
+#ifdef vexpress_a9
+	mmu_init();
+#endif
+
 
 	uart_send_string(stdout, "\n\nHello world!\n\r");
 	uart_send_string(stdin,"Please type here...\n\r");
